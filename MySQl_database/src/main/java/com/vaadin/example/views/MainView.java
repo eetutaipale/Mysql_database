@@ -4,17 +4,27 @@ import com.vaadin.flow.data.renderer.LitRenderer;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.example.ApplicationServiceInitListener;
+import com.vaadin.example.Database_change;
 import com.vaadin.example.data.entity.Movie;
 import com.vaadin.example.data.service.MovieService;
 import com.vaadin.flow.component.dependency.CssImport;
+import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.H3;
+import com.vaadin.flow.component.html.H4;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.component.textfield.TextFieldVariant;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.Key;
+import com.vaadin.flow.component.Text;
 
 /**
  * A simple Vaadin View class that shows all Movies in a database.
@@ -25,15 +35,18 @@ import com.vaadin.flow.component.Key;
 @Route
 @CssImport("./styles/shared-styles.css")
 public class MainView extends VerticalLayout {
-    private TextField name;
+    private TextField Title, creator, wiki;
+    private IntegerField release;
     private Button sayHello;
-
+    private Button testi;
     public MainView(@Autowired MovieService movieService) {
 
         // Create and add header text
         add(new H3("Accessing my local mySQL database"));
-        name = new TextField("Your name");
-
+        Title = new TextField("Title");
+        release = new IntegerField("Release year");
+        creator = new TextField("creator");
+        wiki = new TextField("wiki");
         // create Grid component
         final Grid<Movie> movies = new Grid<>(Movie.class);
 
@@ -53,15 +66,37 @@ public class MainView extends VerticalLayout {
 
         // set one column to specific width
         movies.getColumnByKey("releaseYear").setWidth("55px");
-
+        movies.addComponentColumn(person -> {
+            Button button = new Button("Delete");
+            button.addClickListener(event -> {
+                // Create and open a pop-up dialog
+                Dialog dialog = new Dialog();
+                dialog.add(person.getTitle() + " deleted");
+                dialog.open();
+                Database_change.deletedata(person.getId());
+                movies.setItems(movieService.getMovies());
+            });
+            return button;
+        }).setHeader("Actions");
         // Add Grid to view
         add(movies);
-        Button sayHello = new Button("Say kello");
+        movies.getDataProvider().refreshAll();
+        add(new H4("Add a game"));
+        
+        Button sayHello = new Button("Add to database");
         sayHello.addClickListener(e -> {
-            Notification.show("Hello " + name.getValue());
+            Notification.show("added " + Title.getValue());
+            Database_change.insertData(Title.getValue(), release.getValue(), creator.getValue(), wiki.getValue());
+            movies.setItems(movieService.getMovies());
         });
         sayHello.addClickShortcut(Key.ENTER);
-        add(name, sayHello);
+        HorizontalLayout layout = new HorizontalLayout();
+        layout.add(Title, release, creator, wiki);
+        add(layout);
+        add(sayHello);
+        
+        
+        
     }
 
 }
