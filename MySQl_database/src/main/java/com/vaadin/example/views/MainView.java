@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.example.ApplicationServiceInitListener;
 import com.vaadin.example.Database_change;
+import com.vaadin.example.table_exist;
 import com.vaadin.example.data.entity.Movie;
 import com.vaadin.example.data.service.MovieService;
 import com.vaadin.flow.component.dependency.CssImport;
@@ -74,7 +75,7 @@ public class MainView extends VerticalLayout {
                 Dialog dialog = new Dialog();
                 dialog.add(person.getTitle() + " deleted");
                 dialog.open();
-                Database_change.deletedata(person.getId());
+                Database_change.deletedata(person.getId(), person.getDirector().getName());
                 movies.setItems(movieService.getMovies());
             });
             button2.addClickListener(event -> {
@@ -114,6 +115,7 @@ public class MainView extends VerticalLayout {
         Button sayHello = new Button("Add to database");
         sayHello.addClickListener(e -> {
             Notification.show("added " + Title.getValue());
+            table_exist.checkNameExists(Title.getValue());
             Database_change.insertData(Title.getValue(), release.getValue(), creator.getValue(), wiki.getValue());
             movies.setItems(movieService.getMovies());
         });

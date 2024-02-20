@@ -23,26 +23,40 @@ public class Database_change {
         String sql = "INSERT creator (name) VALUES (?)";
         String sql2 = "INSERT INTO game (title, gameId, release_year, wikilink) VALUES (?, ?, ?, ?)";
         int length = table_exist.checkTableExistence("game");
-
-        try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
-             PreparedStatement statement = conn.prepareStatement(sql)) {
-            statement.setString(1, creator);
-
-            statement.executeUpdate();
-            System.out.println("Data inserted successfully.");
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        Integer nimi = table_exist.checkNameExists(creator);
+        
+                
+                if (nimi != 0) {
+                    System.out.println("Löytyi "+ creator + ". Ei lisätä uutta luojaa");
+                } else {
+                    
+                    try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
+                        PreparedStatement statement = conn.prepareStatement(sql)) {
+                            statement.setString(1, creator);
+                            statement.executeUpdate();
+                            System.out.println("Data inserted successfully.");
+                        } catch (SQLException e) {e.printStackTrace();
+                }
+                }
+            
+            
+        
         
         try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
             
              PreparedStatement statement = conn.prepareStatement(sql2)) {
-                System.out.println(title + release + wiki);
             statement.setString(1, title);
-            
             statement.setInt(2, length);
             statement.setInt(3, release);
             statement.setString(4, wiki);
+            if (nimi != 0) {
+                System.out.println("On olemassa jo luoja "+ creator);
+                statement.setInt(2, nimi);
+            } else {
+                System.out.println("Luojaa ei ole olemassa lisätään uusi "+ creator);
+                statement.setInt(2, length);
+            }
+            
                 
             statement.executeUpdate();
             System.out.println("Data inserted successfully second time");
@@ -50,17 +64,34 @@ public class Database_change {
             e.printStackTrace();
     }
 }
-public static void deletedata(Long name) {
+public static void deletedata(Long name, String cretor) {
     String sql = "DELETE FROM game WHERE id = (?);";
+    String sql3 = "DELETE FROM creator WHERE Id = (?);";
     try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
              PreparedStatement statement = conn.prepareStatement(sql)) {
             statement.setFloat(1, name);
 
             statement.executeUpdate();
-            System.out.println("Data deleted succeffully");
+            System.out.println("Data deleted succefully from game");
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        
+        Integer look = table_exist.checkGameGreator(name);
+        if (look != null) {
+            try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
+            PreparedStatement statement = conn.prepareStatement(sql3)) {
+           statement.setFloat(1, name);
+           statement.executeUpdate();
+            
+       } catch (SQLException e) {
+           e.printStackTrace();
+       } 
+       
+        } else {
+            
+        }
+
 }
 public static void changedata(String name, Integer release, String wiki, Long long1) {
     String sql = "UPDATE game SET release_year = ?, wikilink = ?, title = ? WHERE id = ?";

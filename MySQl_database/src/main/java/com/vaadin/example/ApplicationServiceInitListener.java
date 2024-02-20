@@ -42,7 +42,7 @@ public class ApplicationServiceInitListener implements VaadinServiceInitListener
 	
 	private void initDBStructure() {
 		int length = table_exist.checkTableExistence("game");
-		if(length == 3) {
+		if(length == 0) {
 			jdbcTemplate.execute("DROP TABLE IF EXISTS game;");
         	jdbcTemplate.execute("DROP TABLE IF EXISTS creator;");
 			jdbcTemplate.execute("CREATE TABLE creator (id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(255));");
